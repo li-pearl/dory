@@ -1,4 +1,4 @@
-#Psuedocode available in journal
+#Pseudocode available in journal
 
 import math
 import random
