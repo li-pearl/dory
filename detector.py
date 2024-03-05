@@ -1,4 +1,7 @@
+#Psuedocode available in journal
+
 import math
+import random
 import cv2
 import cvlib as cv
 from cvlib.object_detection import draw_bbox
@@ -19,6 +22,13 @@ quit_button = 15
 labels = []
 wanted_item = ""
 closest_item = ""
+
+#Non-raspberry Pi cameras can be set up and easily integrated like this
+# camera_stream1 = ip of camera stream
+# camera_stream2 = ip of camera stream2
+ 
+#When using multiple streams of this sort this variable is easily implemented
+#room = ""
 
 def listen_recognize_and_find_closet_and_speak():
     recognizer = sr.Recognizer()
@@ -52,20 +62,22 @@ def listen_recognize_and_find_closet_and_speak():
                 
     closest_item = find_closest_object_from_label(wanted_item)
     
-def convert_to_center_x(x, w):
-    return x + (w / 2)
+    speak_general_instructions()
     
-def convert_to_center_y(y, h):
-    return y - (h / 2)
-
-def calculate_distance(x1, y1, x2, y2):
-    return math.sqrt((x1 - x2)**2 + (y1 - y2)**2);
-                
 def find_closest_object_from_label(target_label):
     center_x = float('inf')
     center_y = float('inf')
     min_distance = float('inf')
     
+    def convert_to_center_x(x, w):
+        return x + (w / 2)
+    
+    def convert_to_center_y(y, h):
+        return y - (h / 2)
+
+    def calculate_distance(x1, y1, x2, y2):
+        return math.sqrt((x1 - x2)**2 + (y1 - y2)**2);
+                
     for label, box in zip(labels, bbox):
         if label == target_label:
             x, y, w, h = box
@@ -83,6 +95,25 @@ def find_closest_object_from_label(target_label):
                 closest_item = label
 
     return closest_item
+
+def speak_general_instructions():
+    #Basic string interpolation to create conversational TTS
+    #Multiple sentence forms to be more natural
+    #TODO: implement GPT4
+    n = random.randomint(1,3)
+    
+    #Depending on if you are using camera stream information, the room the object is located in is easily implemented as follows
+    #text_1 = "The, " + {wanted_item} + " is in the " + {room} + "and it's near or on the " + {closest_item}
+    text_1 = "The ," + {wanted_item} + " is next to the " + {closest_item}
+    text_2 = "Try checking for the, " + {wanted_item} + " near the " + {closest_item}
+    text_3 = "You left your, " + {wanted_item} + "near the " + {closest_item}
+    
+    if n % 3 == 0:
+        speak(text_1)
+    elif n % 3 == 1:
+        speak(text_2)
+    elif n % 3 == 2:
+        speak(text_3)
 
 def speak(text):
     engine.say(text)
@@ -132,17 +163,3 @@ while True:
 
 video.release()
 cv2.destroyAllWindows()
-
-# proximity_label = "s"
-
-# i = 0
-# new_sentence = []
-# for label in labels:
-#      if i==0:
-#           new_sentence.append(f"There is a {label}, and, ")
-#      else:
-#           new_sentence.append(f"next to {proximity_label}")
-#      i+=1
-     
-# print(" ".join(new_sentence))
-
